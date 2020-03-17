@@ -5,7 +5,7 @@ import psycopg2
 from subprocess import call
 from companies import norm_banks
 from zipfile import ZipFile
-from itertools import islice
+from multiprocessing import Pool
 
 ### Definicao das variaveis
 indir = '/home/ubuntu/dump/dados_balancete_banco_central/'
@@ -13,6 +13,7 @@ outdir = '/home/ubuntu/scripts/load-dados-balancetes-banco-central/parsed/'
 new_file = 'balancete.csv'
 files = [f for f in os.listdir(indir) if f.endswith('zip')]
 tablename = 'balancetes_banco_central.balancete_geral_stg'
+threats = 2
 
 DATABASE, HOST, USER, PASSWORD = credentials.setDatabaseLogin()
 
@@ -27,16 +28,9 @@ def extract_file(file):
     zip.extractall(indir)
     os.remove(indir+file)
 
-for file in files:
-    extract_file(file)
-
-csvfiles = [f for f in os.listdir(indir) if f.endswith('CSV')]
-
-### Iteracao sobre os arquivos e parser dos CSVs
-
-with open(outdir+new_file,'w', newline="\n", encoding="utf-8") as ofile:
-    writer = csv.writer(ofile, delimiter=';')
-    for file in csvfiles:
+def parseCSV:
+    with open(outdir+new_file,'a', newline="\n", encoding="utf-8") as ofile:
+        writer = csv.writer(ofile, delimiter=';')
         with open(indir+file, 'r', encoding='iso-8859-1') as ifile:
             reader = csv.reader(ifile,delimiter=';')
             count = 0
@@ -60,6 +54,14 @@ with open(outdir+new_file,'w', newline="\n", encoding="utf-8") as ofile:
                     pass
         os.remove(indir+file)
 
+pool = Pool(threats)
+pool.map(extract_file,files)
+
+csvfiles = [f for f in os.listdir(indir) if f.endswith('CSV')]
+
+### Iteracao sobre os arquivos e parser dos CSVs
+pool.map(parseCSV,csvfiles)
+
 ### conecta no banco de dados
 db_conn = psycopg2.connect("dbname='{}' user='{}' host='{}' password='{}'".format(DATABASE, USER, HOST, PASSWORD))
 cursor = db_conn.cursor()
@@ -75,4 +77,4 @@ cursor.close()
 db_conn.close()
 
 ### VACUUM ANALYZE
-call('psql -d torkcapital -c "VACUUM VERBOSE ANALYZE '+tablename+'";',shell=True)
+call('psql -d torkcapital -c "VACUUM ANALYZE '+tablename+'";',shell=True)

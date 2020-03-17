@@ -32,10 +32,10 @@ export -f LoadDW
 LoadHist()
 {
 	TABLE=$1
-	time (psql -d torkcapital -c "COPY (table balancetes_banco_central_dw.${TABLE}_stg) TO '/home/ubuntu/dump/${TABLE}.txt';"
-	psql -d torkcapital -c "COPY balancetes_banco_central_dw.${TABLE}_hist FROM '/home/ubuntu/dump/${TABLE}.txt';"
-	psql -d torkcapital -c "VACUUM ANALYZE balancetes_banco_central_dw.${TABLE}_hist;"
-	psql -d torkcapital -c "TRUNCATE balancetes_banco_central_dw.${TABLE}_stg;")
+	time (psql -d torkcapital -c "COPY (table balancetes_banco_central.${TABLE}_stg) TO '/home/ubuntu/dump/${TABLE}.txt';"
+	psql -d torkcapital -c "COPY balancetes_banco_central.${TABLE}_hist FROM '/home/ubuntu/dump/${TABLE}.txt';"
+	psql -d torkcapital -c "VACUUM ANALYZE balancetes_banco_central.${TABLE}_hist;"
+	psql -d torkcapital -c "TRUNCATE balancetes_banco_central.${TABLE}_stg;")
 	echo -e "$(horario): Tabela $TABLE transferida para dados historicos.\n-\n"
 }
 export -f LoadHist

@@ -71,6 +71,7 @@ def norm_banks(bankname):
         name = name.replace('BCO SANTANDER (BRASIL)','SANTANDER')
         name = name.replace('BCO BS2','BS2')
         name = name.replace('BCO C6','C6 BANK')
+        name = name.replace('ITAÚ UNIBANCO','ITAU')
         
     if name.endswith(' S'):
         name = name[:-2]
